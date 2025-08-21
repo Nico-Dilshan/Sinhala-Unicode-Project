@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Sinhala Unicode Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-color: #10b981;
+            --background: #0f0f23;
+            --surface: #1a1a2e;
+            --surface-light: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-accent: #f472b6;
+            --border: #334155;
+            --border-focus: #667eea;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 1rem;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--primary-gradient);
+            opacity: 0.6;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .converter-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .converter-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 2.5rem;
+            }
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1.5rem;
+            background: var(--surface-light);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .singlish-input {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            color: var(--text-accent);
+            border-color: rgba(244, 114, 182, 0.3);
+        }
+
+        .singlish-input:focus {
+            border-color: var(--text-accent);
+            box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.1);
+        }
+
+        .unicode-output {
+            font-family: 'Iskoola Pota', 'Malithi Web', 'Noto Sans Sinhala', serif;
+            font-size: 1.1rem;
+            background: var(--background);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--success-color);
+            cursor: default;
+        }
+
+        .unicode-output:focus {
+            border-color: var(--success-color);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.02em;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .copy-feedback {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: var(--success-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--transition);
+            pointer-events: none;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+        }
+
+        .copy-feedback::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 1rem;
+            border: 5px solid transparent;
+            border-top-color: var(--success-color);
+        }
+
+        .copy-feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 767px) {
+            .container {
+                padding: 1.5rem;
+                margin: 0.5rem;
+            }
+            
+            .converter-container {
+                gap: 1.5rem;
+            }
+            
+            .button-container {
+                flex-direction: column-reverse;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .textarea {
+                min-height: 150px;
+                padding: 1rem;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--text-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translateY(-50%);
+        }
+
+        @keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Sinhala Unicode Converter</h1>
+            <p>Modern, real-time Singlish to Unicode conversion</p>
+        </header>
+
+        <main>
+            <form id="converterForm" onsubmit="return false;">
+                <div class="converter-container">
+                    <div class="input-group">
+                        <label for="singlishInput" class="input-label">
+                            Singlish Input
+                        </label>
+                        <textarea 
+                            id="singlishInput" 
+                            class="textarea singlish-input" 
+                            placeholder="Type in Singlish... e.g., mama sinhala type karami"
+                            oninput="convertText()"
+                            onpaste="setTimeout(convertText, 10)"
+                        ></textarea>
+                        <div class="button-container">
+                            <button type="button" onclick="clearInput()" class="btn btn-secondary">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="unicodeOutput" class="input-label">
+                            Unicode Output
+                        </label>
+                        <textarea 
+                            id="unicodeOutput" 
+                            class="textarea unicode-output" 
+                            placeholder="Unicode text will appear here... උදා., මම සිංහල type කරමි"
+                            readonly
+                        ></textarea>
+                        <div class="button-container">
+                            <div class="copy-feedback" id="copyFeedback">Copied to clipboard!</div>
+                            <button type="button" onclick="copyToClipboard()" class="btn btn-primary">
+                                Copy Text
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <span id="inputStats">Characters: 0</span>
+                    <span id="outputStats">Unicode: 0</span>
+                </div>
+            </form>
+        </main>
+
+        <footer class="footer">
+            <p>Built with modern web technologies • Real-time conversion</p>
+        </footer>
+    </div>
+
+    <script>
+        // Core conversion logic - optimized and maintained
+        const vowelsUni = ['ඌ', 'ඕ', 'ඕ', 'ආ', 'ආ', 'ඈ', 'ඈ', 'ඈ', 'ඊ', 'ඊ', 'ඊ', 'ඊ', 'ඒ', 'ඒ', 'ඒ', 'ඌ', 'ඌ', 'ඖ', 'ඇ', 'අ', 'ඇ', 'ඉ', 'එ', 'උ', 'ඔ', 'ඓ'];
+        const vowels = ['oo', 'o\\)', 'oe', 'aa', 'a\\)', 'Aa', 'A\\)', 'ae', 'ii', 'i\\)', 'ie', 'ee', 'ea', 'e\\)', 'ei', 'uu', 'u\\)', 'au', '\\\\a', 'a', 'A', 'i', 'e', 'u', 'o', 'I'];
+        const vowelModifiersUni = ['ූ', 'ෝ', 'ෝ', 'ා', 'ා', 'ෑ', 'ෑ', 'ෑ', 'ී', 'ී', 'ී', 'ී', 'ේ', 'ේ', 'ේ', 'ූ', 'ූ', 'ෞ', 'ැ', '', 'ැ', 'ි', 'ෙ', 'ු', 'ො', 'ෛ'];
+        const nVowels = 26;
+        const specialConsonantsUni = ['ං', 'ඃ', 'ඞ', 'ඍ', 'ර්' + '\u200D', 'ර්' + '\u200D'];
+        const specialConsonants = [/\\n/g, /\\h/g, /\\N/g, /\\R/g, /R/g, /\\r/g];
+        const consonantsUni = ['ඬ', 'ඳ', 'ඟ', 'ථ', 'ධ', 'ඝ', 'ඡ', 'ඵ', 'භ', 'ශ', 'ෂ', 'ඥ', 'ඤ', 'ළු', 'ද', 'ච', 'ඛ', 'ත', 'ට', 'ක', 'ඩ', 'න', 'ප', 'බ', 'ම', '‍ය', '‍ය', 'ය', 'ජ', 'ල', 'ව', 'ව', 'ස', 'හ', 'ණ', 'ළ', 'ඛ', 'ඝ', 'ඨ', 'ඪ', 'ඵ', 'ඹ', 'ෆ', 'ඣ', 'ග', 'ර'];
+        const consonants = ['nnd', 'nndh', 'nng', 'Th', 'Dh', 'gh', 'Ch', 'ph', 'bh', 'sh', 'Sh', 'GN', 'KN', 'Lu', 'dh', 'ch', 'kh', 'th', 't', 'k', 'd', 'n', 'p', 'b', 'm', '\\y', 'Y', 'y', 'j', 'l', 'v', 'w', 's', 'h', 'N', 'L', 'K', 'G', 'T', 'D', 'P', 'B', 'f', 'q', 'g', 'r'];
+        const specialCharUni = ['ෲ', 'ෘ'];
+        const specialChar = ['ruu', 'ru'];
+
+        function convertText() {
+            const input = document.getElementById('singlishInput');
+            const output = document.getElementById('unicodeOutput');
+            let text = input.value;
+
+            // Apply conversion logic
+            specialConsonants.forEach((sc, i) => {
+                text = text.replace(sc, specialConsonantsUni[i]);
+            });
+
+            specialCharUni.forEach((scu, i) => {
+                consonants.forEach((c, j) => {
+                    const s = c + specialChar[i];
+                    const v = consonantsUni[j] + scu;
+                    const r = new RegExp(s, "g");
+                    text = text.replace(r, v);
+                });
+            });
+
+            consonants.forEach(c => {
+                vowels.forEach((vowel, i) => {
+                    const s = c + "r" + vowel;
+                    const v = consonantsUni[consonants.indexOf(c)] + "්‍ර" + vowelModifiersUni[i];
+                    const r = new RegExp(s, "g");
+                    text = text.replace(r, v);
+                });
+                const s = c + "r";
+                const v = consonantsUni[consonants.indexOf(c)] + "්‍ර";
+                const r = new RegExp(s, "g");
+                text = text.replace(r, v);
+            });
+
+            consonants.forEach((c, i) => {
+                for (let j = 0; j < nVowels; j++) {
+                    const s = c + vowels[j];
+                    const v = consonantsUni[i] + vowelModifiersUni[j];
+                    const r = new RegExp(s, "g");
+                    text = text.replace(r, v);
+                }
+            });
+
+            consonants.forEach((c, i) => {
+                const r = new RegExp(c, "g");
+                text = text.replace(r, consonantsUni[i] + "්");
+            });
+
+            vowels.forEach((v, i) => {
+                const r = new RegExp(v, "g");
+                text = text.replace(r, vowelsUni[i]);
+            });
+
+            output.value = text;
+            updateStats();
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('unicodeOutput');
+            const feedback = document.getElementById('copyFeedback');
+
+            if (!output.value.trim()) {
+                return;
+            }
+
+            navigator.clipboard.writeText(output.value).then(() => {
+                showCopyFeedback(feedback, 'Copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                try {
+                    output.select();
+                    output.setSelectionRange(0, 99999);
+                    document.execCommand('copy');
+                    showCopyFeedback(feedback, 'Copied to clipboard!');
+                } catch (err) {
+                    showCopyFeedback(feedback, 'Copy failed. Please select manually.');
+                }
+            });
+        }
+
+        function showCopyFeedback(element, message) {
+            element.textContent = message;
+            element.classList.add('show');
+            setTimeout(() => {
+                element.classList.remove('show');
+            }, 2500);
+        }
+
+        function clearInput() {
+            document.getElementById('singlishInput').value = '';
+            document.getElementById('unicodeOutput').value = '';
+            updateStats();
+            document.getElementById('singlishInput').focus();
+        }
+
+        function updateStats() {
+            const input = document.getElementById('singlishInput').value;
+            const output = document.getElementById('unicodeOutput').value;
+            
+            document.getElementById('inputStats').textContent = `Characters: ${input.length}`;
+            document.getElementById('outputStats').textContent = `Unicode: ${output.length}`;
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            document.getElementById('singlishInput').focus();
+            updateStats();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'k':
+                        e.preventDefault();
+                        clearInput();
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        copyToClipboard();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
